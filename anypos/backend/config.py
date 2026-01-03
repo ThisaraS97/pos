@@ -30,5 +30,9 @@ class Settings:
     COMPANY_PHONE: str = ""
     COMPANY_EMAIL: str = ""
     COMPANY_TAX_ID: str = ""
+    
+    # Cash Drawer Settings
+    AUTO_OPEN_CASH_DRAWER: bool = os.getenv("AUTO_OPEN_CASH_DRAWER", "True") == "True"
+    OPEN_DRAWER_FOR_CASH_ONLY: bool = os.getenv("OPEN_DRAWER_FOR_CASH_ONLY", "True") == "True"
 
 settings = Settings()

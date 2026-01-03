@@ -3,8 +3,12 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
 from app.schemas.sale import SaleCreate, SaleResponse, SaleUpdate
-from app.models.sale import Sale, SaleItem
+from app.models.sale import Sale, SaleItem, PaymentMethod
+from app.models.product import Product
 from app.security import get_current_active_user
+from app.hardware.printer import get_printer, PrinterError
+from app.crud import dayend as dayend_crud
+from config import settings
 import uuid
 
 router = APIRouter(prefix="/api/sales", tags=["Sales"])
@@ -48,11 +52,16 @@ def create_sale(sale_data: SaleCreate, db: Session = Depends(get_db),
     
     # Add sale items
     for item in sale_data.items:
+        # Fetch product details
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
+        
         sale_item = SaleItem(
             sale_id=db_sale.id,
             product_id=item.product_id,
-            product_name="",  # Should be fetched from product
-            product_code="",  # Should be fetched from product
+            product_name=product.name,
+            product_code=product.code,
             quantity=item.quantity,
             unit_price=item.unit_price,
             discount=item.discount,
@@ -63,6 +72,53 @@ def create_sale(sale_data: SaleCreate, db: Session = Depends(get_db),
     
     db.commit()
     db.refresh(db_sale)
+    
+    # Automatically add sale to active dayend for the cashier
+    try:
+        active_dayend = dayend_crud.get_or_create_active_dayend(db, current_user.id)
+        dayend_crud.add_sale_to_dayend(db, active_dayend.id, db_sale.id)
+        # Recalculate dayend summary
+        dayend_crud.calculate_dayend_summary(db, active_dayend.id)
+    except Exception as e:
+        # Don't fail the sale if dayend linking fails
+        print(f"Warning: Could not link sale to dayend: {str(e)}")
+    
+    # Open cash drawer if payment method is cash and auto-open is enabled
+    auto_open_drawer = getattr(settings, 'AUTO_OPEN_CASH_DRAWER', True)
+    open_for_cash_only = getattr(settings, 'OPEN_DRAWER_FOR_CASH_ONLY', True)
+    
+    should_open_drawer = False
+    if auto_open_drawer:
+        if open_for_cash_only:
+            # Only open for cash payments
+            if db_sale.payment_method == PaymentMethod.CASH:
+                should_open_drawer = True
+        else:
+            # Open for all payment methods
+            should_open_drawer = True
+    
+    if should_open_drawer:
+        try:
+            printer = get_printer()
+            # Try to connect if not connected, but don't fail if it doesn't work
+            if not printer.is_connected:
+                try:
+                    printer.connect()
+                except PrinterError:
+                    # Printer not available, skip drawer opening
+                    pass
+            
+            # Open drawer if printer is connected
+            if printer.is_connected:
+                try:
+                    printer.open_cash_drawer()
+                except PrinterError as e:
+                    # Log but don't fail the sale if drawer can't open
+                    print(f"Warning: Could not open cash drawer: {str(e)}")
+        except Exception as e:
+            # Don't fail the sale if drawer opening fails
+            print(f"Warning: Cash drawer error: {str(e)}")
+    
     return db_sale
 
 @router.get("/{sale_id}", response_model=SaleResponse)

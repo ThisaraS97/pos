@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { reportService } from '../services/api';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8000/api';
 
 function Dashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
 
     useEffect(() => {
         fetchDashboardStats();
@@ -12,10 +17,10 @@ function Dashboard() {
 
     const fetchDashboardStats = async () => {
         try {
-            const data = await reportService.getDashboard();
-            setStats(data);
+            const res = await axios.get(`${API_URL}/reports/dashboard`, { headers });
+            setStats(res.data);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Failed to fetch dashboard');
         } finally {
             setLoading(false);
         }

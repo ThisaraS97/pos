@@ -1,5 +1,5 @@
 // API Base URL Configuration
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+export const API_BASE_URL = 'http://localhost:8000/api';
 
 // API Client with authentication
 class APIClient {

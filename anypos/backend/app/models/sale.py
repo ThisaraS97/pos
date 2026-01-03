@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Boolean
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
@@ -39,6 +40,9 @@ class Sale(Base):
     
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    items = relationship("SaleItem", back_populates="sale", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Sale {self.reference_number}>"
@@ -60,6 +64,9 @@ class SaleItem(Base):
     subtotal = Column(Float, nullable=False)
     
     created_at = Column(DateTime, server_default=func.now())
+    
+    # Relationships
+    sale = relationship("Sale", back_populates="items")
 
     def __repr__(self):
         return f"<SaleItem {self.product_name}>"

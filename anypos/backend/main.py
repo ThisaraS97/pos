@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from app.database import Base, engine
-from app.routes import auth, product, sale, customer, inventory, expense, report
+from app.routes import auth, product, sale, customer, inventory, expense, report, hardware, dayend
 from app.models import *
 
 # Create tables
@@ -32,6 +32,8 @@ def create_app():
     app.include_router(inventory.router)
     app.include_router(expense.router)
     app.include_router(report.router)
+    app.include_router(hardware.router)
+    app.include_router(dayend.router)
     
     @app.get("/")
     def read_root():

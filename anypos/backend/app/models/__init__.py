@@ -4,6 +4,7 @@ from app.models.customer import Customer
 from app.models.sale import Sale, SaleItem, PaymentMethod, SaleStatus
 from app.models.inventory import StockAdjustment, AdjustmentType
 from app.models.expense import Expense, ExpenseCategory
+from app.models.dayend import DayEnd, DayEndTransaction
 
 __all__ = [
     "User",
@@ -19,4 +20,6 @@ __all__ = [
     "AdjustmentType",
     "Expense",
     "ExpenseCategory",
+    "DayEnd",
+    "DayEndTransaction",
 ]

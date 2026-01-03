@@ -16,6 +16,7 @@ def get_dashboard_stats(db: Session = Depends(get_db),
     """Get dashboard statistics"""
     today = datetime.now().date()
     start_of_month = datetime.now().replace(day=1).date()
+    start_of_year = datetime.now().replace(month=1, day=1).date()
     
     # Today's sales
     today_sales = db.query(Sale).filter(
@@ -33,6 +34,14 @@ def get_dashboard_stats(db: Session = Depends(get_db),
     
     month_revenue = sum(s.total for s in month_sales) if month_sales else 0
     
+    # Year's sales
+    year_sales = db.query(Sale).filter(
+        func.date(Sale.created_at) >= start_of_year,
+        Sale.is_deleted == False
+    ).all()
+    
+    year_revenue = sum(s.total for s in year_sales) if year_sales else 0
+    
     # Count stats
     total_products = db.query(Product).filter(Product.is_active == True).count()
     total_customers = db.query(Customer).filter(Customer.is_active == True).count()
@@ -42,6 +51,7 @@ def get_dashboard_stats(db: Session = Depends(get_db),
         "today_revenue": today_revenue,
         "month_sales": len(month_sales),
         "month_revenue": month_revenue,
+        "year_revenue": year_revenue,
         "total_products": total_products,
         "total_customers": total_customers
     }
@@ -66,5 +76,33 @@ def get_sales_report(start_date: str = None, end_date: str = None, db: Session =
 @router.get("/products/top")
 def get_top_products(limit: int = 10, db: Session = Depends(get_db)):
     """Get top selling products"""
-    # This would need SaleItem joins for actual implementation
-    return {"message": "Top products endpoint"}
+    from app.models.sale import SaleItem
+    
+    # Get top selling products
+    top_products = db.query(
+        Product.id,
+        Product.name,
+        Product.code,
+        func.sum(SaleItem.quantity).label('total_quantity'),
+        func.sum(SaleItem.subtotal).label('total_revenue')
+    ).join(
+        SaleItem, SaleItem.product_id == Product.id
+    ).filter(
+        Product.is_active == True
+    ).group_by(
+        Product.id, Product.name, Product.code
+    ).order_by(
+        func.sum(SaleItem.quantity).desc()
+    ).limit(limit).all()
+    
+    return [
+        {
+            "id": p[0],
+            "name": p[1],
+            "code": p[2],
+            "units_sold": int(p[3]) if p[3] else 0,
+            "total_revenue": float(p[4]) if p[4] else 0.0,
+            "avg_price": float(p[4] / p[3]) if p[3] and p[4] else 0.0
+        }
+        for p in top_products
+    ]

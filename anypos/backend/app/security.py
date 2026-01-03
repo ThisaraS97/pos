@@ -8,7 +8,7 @@ from app.database import get_db
 from app.crud.user import get_user_by_username
 from sqlalchemy.orm import Session
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()

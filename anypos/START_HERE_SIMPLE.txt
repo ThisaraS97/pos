@@ -1,0 +1,92 @@
+═════════════════════════════════════════════════════════════════════════════════
+                                                                                                    
+                                   👋 HI THERE!                                                   
+                                                                                                    
+              Your AnyPos POS System is Ready to Use - Here's What to Do:                         
+                                                                                                    
+═════════════════════════════════════════════════════════════════════════════════
+
+📂 STEP 1: OPEN THE FOLDER
+──────────────────────────
+
+C:\Users\Thisara\Documents\pos\anypos
+
+
+🖱️  STEP 2: DOUBLE-CLICK THIS FILE
+──────────────────────────────────
+
+                              📄 START.bat
+
+(It will look like a document icon)
+
+
+⏳ STEP 3: WAIT FOR IT TO START
+──────────────────────────────
+
+This will take about 30 seconds. Two windows will appear:
+  • One will say "AnyPos Backend"
+  • One will say "AnyPos Frontend"
+
+DON'T CLOSE THESE WINDOWS! They need to keep running.
+
+
+🌐 STEP 4: USE YOUR POS SYSTEM
+──────────────────────────────
+
+After it starts, your browser will open automatically, or go to:
+
+                         http://localhost:5173
+
+You'll see a login screen. Use these credentials:
+
+        Username: admin
+        Password: admin123
+
+Then click "Login"
+
+
+✅ THAT'S IT! YOU'RE DONE!
+──────────────────────────
+
+Now you can:
+  • Add products
+  • Create sales
+  • Manage customers
+  • Track inventory
+  • View reports
+
+Everything is ready to use!
+
+
+🛑 TO STOP THE APP
+──────────────────
+
+Close the two PowerShell windows.
+
+
+❓ PROBLEMS?
+────────────
+
+If START.bat doesn't work:
+
+1. Make sure Python is installed:
+   Download from: https://www.python.org
+   
+2. Make sure Node.js is installed:
+   Download from: https://nodejs.org
+   
+3. When installing, make sure to check the box that says:
+   ☑️ "Add to PATH" or "Add to system path"
+   
+4. Restart your computer
+   
+5. Try clicking START.bat again
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+That's literally all you need to know! 🎉
+
+The app is ready. Just double-click START.bat and you're good to go.
+
+═════════════════════════════════════════════════════════════════════════════════
